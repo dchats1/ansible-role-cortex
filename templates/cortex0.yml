@@ -1,0 +1,78 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 9009
+
+  # Configure the server to allow messages up to 100MB.
+  grpc_server_max_recv_msg_size: 104857600
+  grpc_server_max_send_msg_size: 104857600
+  grpc_server_max_concurrent_streams: 1000
+
+distributor:
+  shard_by_all_labels: true
+  pool:
+    health_check_ingesters: true
+  ha_tracker:
+    enable_ha_tracker: true
+
+    kvstore:
+      store: etcd
+      prefix: ha-tracker/
+      etcd:
+        endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
+
+  ring:
+    kvstore:
+      store: etcd
+      etcd:
+        endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
+
+
+ingester_client:
+  grpc_client_config:
+    # Configure the client to allow messages up to 100MB.
+    max_recv_msg_size: 104857600
+    max_send_msg_size: 104857600
+    use_gzip_compression: true
+
+ingester:
+  lifecycler:
+    # The address to advertise for this ingester.  Will be autodiscovered by
+    # looking up address on eth0 or en0; can be specified if this fails.
+    interface_names: [enp1s0]
+    address: cortex0.bos2.linuxlab.tech
+
+    # We want to start immediately and flush on shutdown.
+    join_after: 0
+    final_sleep: 0s
+    num_tokens: 512
+
+    ring:
+      kvstore:
+        store: etcd
+        etcd:
+          endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
+      replication_factor: 1
+
+limits:
+  accept_ha_samples: true
+  ha_cluster_label: prometheus_cluster
+  ha_replica_label: prometheus_replica
+
+schema:
+  configs:
+  - from: 2020-07-07
+    store: cassandra
+    object_store: cassandra
+    schema: v10
+    index:
+      prefix: index_
+      period: 168h
+    chunks:
+      prefix: chunk_
+      period: 168h
+
+storage:
+  cassandra:
+    addresses: 172.16.20.130,172.16.20.131,172.16.20.132
+    keyspace: cortex

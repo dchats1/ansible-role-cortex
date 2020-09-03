@@ -1,2 +1,35 @@
 ---
-# tasks file for cortex
+- include_tasks: set_facts.yml
+
+- name: Create Cortex pods
+  containers.podman.podman_pod:
+    name: '{{ item.split(".")[0] }}'
+    state: started
+    network: '{{ cortex_podman_network }}'
+#    ip: '{{ item }}' #TODO figure out how to set the IP of pods
+    hostname: '{{ item }}'
+  loop: '{{ cortex_hostnames }}'
+  when: cortex_single_host_deployment == true
+
+- name: Get pod info
+  containers.podman.podman_pod_info:
+    name: cortex1
+  register: pod_info
+
+- debug:
+    msg: '{{ pod_info.pods[0].State.infraContainerID }}'
+
+- name: get pod IP
+  containers.podman.podman_container_info:
+    name: '{{ pod_info.pods[0].State.infraContainerID }}'
+  register: container_info
+
+- debug:
+    msg: '{{ container_info.containers[0].NetworkSettings.Networks.podman.IPAddress }}'
+
+- name: Create pid file directory for containers
+  file:
+    path: /var/lib/containers/pids/
+    state: directory
+
+- include_tasks: etcd.yml

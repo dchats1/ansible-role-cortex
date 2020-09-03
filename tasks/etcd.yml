@@ -1,0 +1,17 @@
+---
+- name: Setup Etcd Cluster
+  containers.podman.podman_container:
+    name: '{{ item.split(".")[0] }}-etcd'
+    image: quay.io/coreos/etcd:v3.4.9
+    pod: '{{ item.split(".")[0] }}'
+    conmon_pidfile: '/var/lib/containers/pids/{{ item.split(".")[0] }}.pid'
+    volume:
+      - /etc/pki/ca-trust/extracted/pem/:/etc/ssl/certs:z
+    #TODO Update to IP each pod instead of fqdn
+    command: '/usr/local/bin/etcd --name {{ item.split(".")[0] }}-etcd --auto-compaction-retention=1 --advertise-client-urls http://{{ item }}:2379,http://{{ item }}:4001 --listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 --initial-advertise-peer-urls http://{{ item }}:2380 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster-token etcd-cluster-1 --initial-cluster {{ cortex_etcd_initial_cluster | join(",") }} --initial-cluster-state new'
+    state: started
+  loop: '{{ cortex_hostnames }}'
+
+- name: Generate systemd files for etcd cluster
+  include_tasks: systemd.yml
+  loop: '{{ cortex_hostnames_short }}'

@@ -1,7 +1,7 @@
-Role Name
+Cortex
 =========
 
-A brief description of the role goes here.
+Deploys podman pods containing Cortex + Etcd + Cassandra that can be used together in a cluster
 
 Requirements
 ------------
@@ -35,4 +35,5 @@ BSD
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+David Chatterton
+david@davidchatterton.com

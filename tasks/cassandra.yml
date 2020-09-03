@@ -1,0 +1,40 @@
+---
+- name: Make Cassandra data directories
+  file:
+    path: '/var/lib/containers/cassandra{{ item }}'
+    mode: '0755'
+    state: directory
+  loop:
+    - 0
+    - 1
+    - 2
+
+- name: Setup Cassandra Cluster
+  containers.podman.podman_container:
+    name: 'cassandra{{ item }}'
+    image: docker.io/library/cassandra:3.11
+    pod: 'cortex{{ item }}'
+    conmon_pidfile: '/var/lib/containers/pids/cassandra{{ item }}.pid'
+    volume:
+      - '/var/lib/containers/cassandra{{ item }}:/var/lib/cassandra:Z'
+    env:
+      CASSANDRA_SEEDS: "172.16.20.130,172.16.20.131,172.16.20.132"
+      CASSANDRA_CLUSTER_NAME: "cortex-bos2"
+      CASSANDRA_DC: "bos2"
+      CASSANDRA_RACK: "rack1"
+      CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
+    state: started
+  loop:
+    - 0
+    - 1
+    - 2
+
+- name: Generate systemd files for Cassandra cluster
+  include_tasks: systemd.yml
+  loop:
+    - cassandra0
+    - cassandra1
+    - cassandra2
+
+
+#CREATE KEYSPACE if NOT EXISTS cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};

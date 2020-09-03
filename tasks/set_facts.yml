@@ -1,0 +1,35 @@
+---
+- set_fact:
+    cortex_hostnames: '{{ cortex_hostnames|default([]) + [ "cortex" + (item|string) + "." + cortex_domain ] }}'
+  loop: '{{ range(1, cortex_cluster_size + 1)|list }}'
+
+- debug:
+    msg: '{{ cortex_hostnames }}'
+
+- set_fact:
+    cortex_hostnames_short: '{{ cortex_hostnames_short|default([]) + [ item.split(".")[0] ] }}'
+  loop: '{{ cortex_hostnames }}'
+
+- debug:
+    msg: '{{ cortex_hostnames_short }}'
+
+- set_fact:
+    cortex_cassandra_addresses: '{{ cortex_hostnames }}'
+
+- set_fact:
+    cortex_etcd_endpoints: '{{ cortex_etcd_endpoints|default([]) + [ item + ":" + (cortex_etcd_port|string) ] }}'
+  loop: '{{ cortex_hostnames }}'
+
+- set_fact:
+    cortex_etcd_containers: '{{ cortex_etcd_containers|default([]) + [ item + "-etcd" ] }}'
+  loop: '{{ cortex_hostnames_short }}'
+
+- debug:
+    msg: '{{ cortex_etcd_containers }}'
+
+- set_fact:
+    cortex_etcd_initial_cluster: '{{ cortex_etcd_initial_cluster|default([]) + [ item.split(".")[0] + "-etcd=http://" + item + ":2381" ] }}'
+  loop: '{{ cortex_hostnames }}'
+
+- debug:
+    msg: '{{ cortex_etcd_initial_cluster | join(",") }}'
