@@ -1,9 +1,4 @@
 ---
-#- include_tasks: set_facts.yml
-
-- set_fact:
-    cortex_host_interface: '{{ ansible_default_ipv4.alias }}'
-
 - set_fact:
     services_to_restart: []
 
