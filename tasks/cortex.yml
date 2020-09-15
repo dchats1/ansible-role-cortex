@@ -1,82 +1,64 @@
 ---
-
 - name: Create Cortex config directory
   file:
     path: /var/lib/containers/cortex-config/
     mode: '0775'
     state: directory
 
-- name: Set Cortex conf files
+# FIX
+- name: Set Cortex conf file
   template:
-    src: 'cortex{{ item }}.yml'
-    dest: '/var/lib/containers/cortex-config/cortex{{ item }}.yml'
+    src: 'cortex.yaml'
+    dest: '/var/lib/containers/cortex-config/cortex.yaml'
     mode: '0644'
-  loop:
-    - 0
-    - 1
-    - 2
 
-- name: Setup Cortex Cluster
+- name: Create Distributor pods
+  containers.podman.podman_pod:
+    name: 'cortex-distributor-{{ item }}-pod'
+    state: started
+    network: '{{ cortex_podman_network }}'
+    hostname: 'cortex-distributor-{{ item|string + "." + cortex_domain }}'
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+
+- name: Setup Cortex Distributors
   containers.podman.podman_container:
-    name: 'cortex-server{{ item }}'
-    image: quay.io/cortexproject/cortex:v1.2.0
-    pod: 'cortex{{ item }}'
-    conmon_pidfile: '/var/lib/containers/pids/cortex{{ item }}.pid'
+    name: 'cortex-distributor-{{ item }}'
+    image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
+    pod: 'cortex-distributor-{{ item }}-pod'
+    conmon_pidfile: '/var/lib/containers/pids/cortex-distributor-{{ item }}.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex{{ item }}.yml:/etc/cortex.yml:Z'
-    command: '-config.file=/etc/cortex.yml'
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+    command: '-target=distributor -config.file=/etc/cortex.yaml'
     state: started
-  loop:
-    - 0
-    - 1
-    - 2
+#    restart_policy: always
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
 
-- name: Generate systemd files for Cortex cluster
-  include_tasks: systemd.yml
-  loop:
-    - cortex-server0
-    - cortex-server1
-    - cortex-server2
+- name: Create Ingesters pods
+  containers.podman.podman_pod:
+    name: 'cortex-ingester-{{ item }}-pod'
+    state: started
+    network: '{{ cortex_podman_network }}'
+    hostname: 'cortex-ingester-{{ item|string + "." + cortex_domain }}'
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
-# Separate role? or variable to use nginx as a LB
-- name: Add nginx lb config
-  template:
-    src: nginx.conf
-    dest: /var/lib/containers/cortex-config/nginx.conf
-    mode: '0644'
+# Create and mount WAL directories
 
-- name: Setup Nginx LoadBalancer
+- name: Setup Cortex Ingesters
   containers.podman.podman_container:
-    name: cortex-loadbalancer
-    image: docker.io/library/nginx:latest
-    network: prod
-    ip: 172.16.20.126
-    hostname: cortex.bos2.linuxlab.tech
-    conmon_pidfile: '/var/lib/containers/pids/cortex-lb.pid'
+    name: 'cortex-ingester-{{ item }}'
+    image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
+    pod: 'cortex-ingester-{{ item }}-pod'
+    conmon_pidfile: '/var/lib/containers/pids/cortex-ingester-{{ item }}.pid'
     volume:
-      - /var/lib/containers/cortex-config/nginx.conf:/etc/nginx/conf.d/default.conf:Z
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+    command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
+#    restart_policy: always
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
-- name: Generate systemd unit content
-  shell: podman generate systemd cortex-loadbalancer -n --restart-policy on-failure | tail -n +5
-  changed_when: False
-  register: systemd
-
-- name: Create unit file
-  copy:
-    content: '{{systemd.stdout }}'
-    dest: /etc/systemd/system/container-cortex-loadbalancer.service
-    owner: root
-    group: root
-    mode: '0644'
-  register: unit_file
-  notify:
-    - daemon-reload
-    - Restart cortex-loadbalancer
-
-- name: Start Grafana Server
-  systemd:
-    name: container-cortex-loadbalancer.service
-    state: started
-    enabled: yes
-  when: unit_file.changed == false
+#- name: Generate systemd files for Cortex cluster
+#  include_tasks: systemd.yml
+#  loop:
+#    - cortex-server0
+#    - cortex-server1
+#    - cortex-server2

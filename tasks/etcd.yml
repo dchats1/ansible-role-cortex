@@ -30,15 +30,9 @@
   vars:
     query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
 
-- debug:
-    msg: '{{ cortex_etcd_pod_ips }}'
-
 - set_fact:
-    cortex_etcd_endpoints: '{{ cortex_etcd_endpoints|default([]) + [ item + ":" + (cortex_etcd_port|string) ] }}'
+    cortex_etcd_endpoints: '{{ cortex_etcd_endpoints|default([]) + [ "http://" + item + ":" + (cortex_etcd_port|string) ] }}'
   loop: '{{ cortex_etcd_pod_ips }}'
-
-- debug:
-    msg: '{{ cortex_etcd_endpoints }}'
 
 - set_fact:
     cortex_etcd_cluster: '{{ cortex_etcd_cluster|default([]) + [ "http://" + item + ":2380" ] }}'
@@ -48,9 +42,6 @@
     cortex_etcd_initial_cluster: '{{ cortex_etcd_initial_cluster|default([]) + [ "etcd" + item|string + "=" + cortex_etcd_cluster[ item ]] }}'
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
 
-- debug:
-    msg: '{{ cortex_etcd_initial_cluster }}'
-
 - name: Setup Etcd Cluster
   containers.podman.podman_container:
     name: 'cortex-etcd-{{ item }}'
@@ -59,7 +50,6 @@
     conmon_pidfile: '/var/lib/containers/pids/cortex-etcd-{{ item }}.pid'
     volume:
       - /etc/pki/ca-trust/extracted/pem/:/etc/ssl/certs:z
-    #TODO Update to IP each pod instead of fqdn
     command: '/usr/local/bin/etcd --name etcd{{ item }} --auto-compaction-retention=1 --advertise-client-urls http://{{ cortex_etcd_pod_ips[ item ] }}:2379,http://{{ cortex_etcd_pod_ips[ item ] }}:4001 --listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 --initial-advertise-peer-urls http://{{ cortex_etcd_pod_ips[ item ] }}:2380 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster-token etcd-cluster-1 --initial-cluster {{ cortex_etcd_initial_cluster | join(",") }} --initial-cluster-state new'
     state: started
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'

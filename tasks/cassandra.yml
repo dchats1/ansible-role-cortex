@@ -36,9 +36,6 @@
   vars:
     query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
 
-- debug:
-    msg: '{{ cortex_cassandra_pod_ips }}'
-
 - name: Setup Cassandra Cluster
   containers.podman.podman_container:
     name: 'cortex-cassandra-{{ item }}'
@@ -60,9 +57,7 @@
   shell: podman exec cortex-cassandra-0 cqlsh -e "{{ query }}"
   vars:
     query: "CREATE KEYSPACE if NOT EXISTS cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : {{ cortex_cassandra_replication_factor }} };"
+
 #- name: Generate systemd files for Cassandra cluster
 #  include_tasks: systemd.yml
 #  loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
-
-
-#CREATE KEYSPACE if NOT EXISTS cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3};

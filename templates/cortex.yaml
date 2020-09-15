@@ -1,12 +1,11 @@
 auth_enabled: false
 
 server:
-  http_listen_port: 9009
-
-  # Configure the server to allow messages up to 100MB.
+  http_listen_port: {{ cortex_http_listen_port }}
+  grpc_listen_port: 9095
+  grpc_server_max_concurrent_streams: 1000
   grpc_server_max_recv_msg_size: 104857600
   grpc_server_max_send_msg_size: 104857600
-  grpc_server_max_concurrent_streams: 1000
 
 distributor:
   shard_by_all_labels: true
@@ -14,19 +13,22 @@ distributor:
     health_check_ingesters: true
   ha_tracker:
     enable_ha_tracker: true
-
     kvstore:
       store: etcd
-      prefix: ha-tracker/
+      prefix: {{ cortex_distributor_kvstore_prefix }}
       etcd:
-        endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
-
+        endpoints:
+{% for endpoint in cortex_etcd_endpoints %}
+          - {{ endpoint }}
+{% endfor %}
   ring:
     kvstore:
       store: etcd
       etcd:
-        endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
-
+        endpoints:
+{% for endpoint in cortex_etcd_endpoints %}
+          - {{ endpoint }}
+{% endfor %}
 
 ingester_client:
   grpc_client_config:
@@ -37,27 +39,26 @@ ingester_client:
 
 ingester:
   lifecycler:
-    # The address to advertise for this ingester.  Will be autodiscovered by
-    # looking up address on eth0 or en0; can be specified if this fails.
-    interface_names: [enp1s0]
-    address: cortex0.bos2.linuxlab.tech
-
     # We want to start immediately and flush on shutdown.
     join_after: 0
     final_sleep: 0s
     num_tokens: 512
 
     ring:
+      replication_factor: {{ cortex_etcd_replicas }}
       kvstore:
         store: etcd
+        prefix: {{ cortex_ingester_kvstore_prefix }}
         etcd:
-          endpoints: ['http://172.16.20.130:2379','http://172.16.20.131:2379','http://172.16.20.132:2379']
-      replication_factor: 1
+          endpoints:
+{% for endpoint in cortex_etcd_endpoints %}
+          - {{ endpoint }}
+{% endfor %}
 
 limits:
   accept_ha_samples: true
-  ha_cluster_label: prometheus_cluster
-  ha_replica_label: prometheus_replica
+  ha_cluster_label: {{ cortex_limits_ha_cluster_label }}
+  ha_replica_label: {{ cortex_limits_ha_replica_label }}
 
 schema:
   configs:
@@ -74,5 +75,6 @@ schema:
 
 storage:
   cassandra:
-    addresses: 172.16.20.130,172.16.20.131,172.16.20.132
-    keyspace: cortex
+    addresses: {{ cortex_cassandra_pod_ips|join(',') }}
+    keyspace: {{ cortex_cassandra_keyspace }}
+    replication_factor: {{ cortex_cassandra_replicas }}
