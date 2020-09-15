@@ -1,0 +1,17 @@
+---
+- name: Add nginx load balancer config
+  template:
+    src: nginx.conf
+    dest: /var/lib/containers/cortex-config/nginx.conf
+    mode: '0644'
+
+- name: Setup Nginx LoadBalancer
+  containers.podman.podman_container:
+    name: cortex-loadbalancer
+    image: docker.io/library/nginx:latest
+    network: host
+    hostname: 'cortex.{{ cortex_domain }}'
+    conmon_pidfile: '/var/lib/containers/pids/cortex-lb.pid'
+    volume:
+      - /var/lib/containers/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z
+    state: started

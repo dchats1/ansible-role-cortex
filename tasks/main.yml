@@ -12,3 +12,4 @@
 - include_tasks: etcd.yml
 - include_tasks: cassandra.yml
 - include_tasks: cortex.yml
+- include_tasks: nginx.yml
