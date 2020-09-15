@@ -10,6 +10,7 @@ cortex_etcd_replication_factor: '{{ cortex_etcd_replicas }}'
 cortex_ingester_replicas: 3
 cortex_ingester_kvstore_provider: etcd
 cortex_ingester_kvstore_prefix: collectors/
+cortex_ingesters_with_wal: true
 cortex_distributor_replicas: 3
 cortex_distributor_kvstore_provider: etcd
 cortex_distributor_kvstore_prefix: ha-tracker/ 

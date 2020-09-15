@@ -25,6 +25,7 @@ cortex_etcd_replication_factor      | Etcd replica factor. (Default: Matches `co
 cortex_ingester_replicas            | Cortex Ingester replicas. (Default: 3)
 cortex_ingester_kvstore_provider    | Cortex Ingester KV provider. Only etcd supported right now. (Default: etcd)
 cortex_ingester_kvstore_prefix      | Cortex Ingester KV prefix. (Default: collectors/)
+cortex_ingesters_with_wal           | Use Ingesters with WAL. (Default: true)
 cortex_distributor_replicas         | Cortex Distributor replicas. (Default: 3)
 cortex_distributor_kvstore_provider | Cortex Distributor KV provider. Only etcd supported right now. (Default: etcd)
 cortex_distributor_kvstore_prefix   | Cortex Distributor KV prefix. (Default: ha-tracker/)

@@ -38,6 +38,14 @@ ingester_client:
     use_gzip_compression: true
 
 ingester:
+{% if cortex_ingesters_with_wal %}
+  walconfig:
+    wal_enabled: true
+    wal_dir: /wal
+    recover_from_wal: true
+    flush_on_shutdown_with_wal_enabled: true
+{% endif %}
+
   lifecycler:
     # We want to start immediately and flush on shutdown.
     join_after: 0
