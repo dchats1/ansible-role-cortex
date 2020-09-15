@@ -4,6 +4,11 @@
     src: nginx.conf
     dest: /var/lib/containers/cortex-config/nginx.conf
     mode: '0644'
+  register: nginx_conf
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-loadbalancer.service" ] }}'
+  when: nginx_conf.changed
 
 - name: Setup Nginx LoadBalancer
   containers.podman.podman_container:
@@ -15,3 +20,8 @@
     volume:
       - /var/lib/containers/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z
     state: started
+
+- name: Generate systemd files for nginx
+  include_tasks: systemd.yml
+  vars:
+    item: cortex-loadbalancer

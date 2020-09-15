@@ -1,24 +1,27 @@
 ---
 - name: Generate systemd unit content
-  shell: 'podman generate systemd {{ item.split(".")[0] }} -n --restart-policy on-failure -t 120 | tail -n +5'
+  shell: 'podman generate systemd {{ item }} -n --restart-policy on-failure -t 120 | tail -n +5'
   changed_when: False
   register: systemd
 
 - name: Create unit file
   copy:
     content: '{{systemd.stdout }}'
-    dest: '/etc/systemd/system/container-{{ item.split(".")[0] }}.service'
+    dest: '/etc/systemd/system/container-{{ item }}.service'
     owner: root
     group: root
     mode: '0644'
   register: unit_file
   notify:
     - daemon-reload
-    - 'Restart {{ item.split(".")[0] }}'
 
 - name: Start Service
   systemd:
-    name: 'container-{{ item..split(".")[0] }}.service'
+    name: 'container-{{ item }}.service'
     state: started
     enabled: yes
   when: unit_file.changed == false
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-" + item + ".service" ] }}'
+  when: unit_file.changed == true

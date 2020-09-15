@@ -18,6 +18,17 @@
     src: 'cortex.yaml'
     dest: '/var/lib/containers/cortex-config/cortex.yaml'
     mode: '0644'
+  register: cortex_conf
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-ingester-" + item + ".service" ] }}'
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+  when: cortex_conf.changed
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-distributor-" + item + ".service" ] }}'
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+  when: cortex_conf.changed
 
 - name: Create Distributor pods
   containers.podman.podman_pod:
@@ -59,7 +70,6 @@
       - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
     command: '-target=distributor -config.file=/etc/cortex.yaml'
     state: started
-#    restart_policy: always
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
 
 - name: Create Ingesters pods
@@ -80,7 +90,6 @@
       - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
     command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
-#    restart_policy: always
   when: cortex_ingesters_with_wal|bool == False
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
@@ -95,9 +104,6 @@
       - '/var/lib/containers/cortex-ingester-wal-{{ item }}:/wal:Z'
     command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
-#    restart_policy: always
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
-#- name: Generate systemd files for Cortex cluster
-#  include_tasks: systemd.yml

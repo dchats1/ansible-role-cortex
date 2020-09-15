@@ -4,6 +4,9 @@
 - set_fact:
     cortex_host_interface: '{{ ansible_default_ipv4.alias }}'
 
+- set_fact:
+    services_to_restart: []
+
 - name: Create pid file directory for containers
   file:
     path: /var/lib/containers/pids/
@@ -13,3 +16,7 @@
 - include_tasks: cassandra.yml
 - include_tasks: cortex.yml
 - include_tasks: nginx.yml
+
+- debug:
+    msg: '{{ services_to_restart }}'
+  notify: Restart Service

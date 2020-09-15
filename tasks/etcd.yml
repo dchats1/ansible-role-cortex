@@ -54,6 +54,10 @@
     state: started
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
 
-#- name: Generate systemd files for etcd cluster
-#  include_tasks: systemd.yml
-#  loop: '{{ cortex_hostnames_short }}'
+- set_fact:
+    cortex_etcd_containers: '{{ cortex_etcd_containers|default([]) + [ "cortex-etcd-" +  item|string ] }}'
+  loop: '{{ range(0, cortex_etcd_replicas)|list }}'
+
+- name: Generate systemd files for etcd cluster
+  include_tasks: systemd.yml
+  loop: '{{ cortex_etcd_containers }}'

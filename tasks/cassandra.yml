@@ -58,6 +58,10 @@
   vars:
     query: "CREATE KEYSPACE if NOT EXISTS {{ cortex_cassandra_keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor' : {{ cortex_cassandra_replication_factor }} };"
 
-#- name: Generate systemd files for Cassandra cluster
-#  include_tasks: systemd.yml
-#  loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
+- set_fact:
+    cortex_cassandra_containers: '{{ cortex_cassandra_containers|default([]) + [ "cortex-cassandra-" +  item|string ] }}'
+  loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
+
+- name: Generate systemd files for cassandra cluster
+  include_tasks: systemd.yml
+  loop: '{{ cortex_cassandra_containers }}'
