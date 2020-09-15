@@ -1,7 +1,7 @@
 ---
-- set_fact:
-    cortex_hostnames: '{{ cortex_hostnames|default([]) + [ "cortex" + (item|string) + "." + cortex_domain ] }}'
-  loop: '{{ range(1, cortex_cluster_size + 1)|list }}'
+#- set_fact:
+#    cortex_hostnames: '{{ cortex_hostnames|default([]) + [ "cortex" + (item|string) + "." + cortex_domain ] }}'
+#  loop: '{{ range(1, cortex_cluster_size + 1)|list }}'
 
 - debug:
     msg: '{{ cortex_hostnames }}'
