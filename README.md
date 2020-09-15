@@ -1,22 +1,40 @@
 Cortex
 =========
 
-Deploys podman pods containing Cortex + Etcd + Cassandra that can be used together in a cluster
+Deploys a Cortex Cluster on Podman. Uses etcd and Cassandra.
+https://cortexmetrics.io/
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This requires the containers.podman collection: https://galaxy.ansible.com/containers/podman
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Variable                            | Description
+------------------------------------|------------------------------------------------------------------------
+cortex_version                      | Version of Cortex to deploy. (Default: v1.3.0)
+cortex_single_host_deployment       | Deploy on a single host. Multi host currently not supported. (Default: true)
+cortex_domain                       | Domain for Cortex. (Default: example.com)
+cortex_podman_network               | Podman Network for pods and containers. (Default: podman)
+cortex_http_listen_port             | Default port for distributors to listen on. (Default: 9009)
+cortex_etcd_replicas                | Number of etcd replicas. (Default: 3)
+cortex_etcd_port                    | Etcd port. (Default: 2379)
+cortex_etcd_replication_factor      | Etcd replica factor. (Default: Matches `cortex_etcd_replicas`)
+cortex_ingester_replicas            | Cortex Ingester replicas. (Default: 3)
+cortex_ingester_kvstore_provider    | Cortex Ingester KV provider. Only etcd supported right now. (Default: etcd)
+cortex_ingester_kvstore_prefix      | Cortex Ingester KV prefix. (Default: collectors/)
+cortex_distributor_replicas         | Cortex Distributor replicas. (Default: 3)
+cortex_distributor_kvstore_provider | Cortex Distributor KV provider. Only etcd supported right now. (Default: etcd)
+cortex_distributor_kvstore_prefix   | Cortex Distributor KV prefix. (Default: ha-tracker/)
+cortex_limits_accept_ha_samples     | Enable HA Tracker. (Default: true)
+cortex_limits_ha_cluster_label      | Limits HA cluster label. (Default: prometheus_cluster)
+cortex_limits_ha_replica_label      | Limits HA replica label. (Default: prometheus_replica)
+cortex_cassandra_replicas           | Number of Cassandra replicas. (Default: 3)
+cortex_cassandra_addresses          | Cassandra addresses. These are collected dynamically from each Cassandra pod.
+cortex_cassandra_keyspace           | Cortex keyspace in Cassandra. (Default: cortex)
+cortex_cassandra_replication_factor | Number of replicas in Cassandra. (Default: Matches `cortex_cassandra_replicas`)
 
 Example Playbook
 ----------------

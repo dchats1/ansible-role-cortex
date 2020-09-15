@@ -56,7 +56,7 @@
 - name: Create Cortex keyspace
   shell: podman exec cortex-cassandra-0 cqlsh -e "{{ query }}"
   vars:
-    query: "CREATE KEYSPACE if NOT EXISTS cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : {{ cortex_cassandra_replication_factor }} };"
+    query: "CREATE KEYSPACE if NOT EXISTS {{ cortex_cassandra_keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor' : {{ cortex_cassandra_replication_factor }} };"
 
 #- name: Generate systemd files for Cassandra cluster
 #  include_tasks: systemd.yml

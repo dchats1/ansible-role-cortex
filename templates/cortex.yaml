@@ -56,7 +56,7 @@ ingester:
 {% endfor %}
 
 limits:
-  accept_ha_samples: true
+  accept_ha_samples: {{ cortex_limits_accept_ha_samples }}
   ha_cluster_label: {{ cortex_limits_ha_cluster_label }}
   ha_replica_label: {{ cortex_limits_ha_replica_label }}
 
@@ -77,4 +77,4 @@ storage:
   cassandra:
     addresses: {{ cortex_cassandra_pod_ips|join(',') }}
     keyspace: {{ cortex_cassandra_keyspace }}
-    replication_factor: {{ cortex_cassandra_replicas }}
+    replication_factor: {{ cortex_cassandra_replication_factor }}
