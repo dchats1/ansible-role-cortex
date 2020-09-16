@@ -21,12 +21,12 @@
   register: cortex_conf
 
 - set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-ingester-" + item + ".service" ] }}'
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-ingester-" + item|string + ".service" ] }}'
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
   when: cortex_conf.changed
 
 - set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-distributor-" + item + ".service" ] }}'
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-distributor-" + item|string + ".service" ] }}'
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
   when: cortex_conf.changed
 
@@ -107,3 +107,45 @@
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
+# Querier
+- name: Create Querier pod
+  containers.podman.podman_pod:
+    name: 'cortex-querier-pod'
+    state: started
+    network: '{{ cortex_podman_network }}'
+    hostname: 'cortex-querier.{{ cortex_domain }}'
+
+- name: Get Querier Infra Container
+  containers.podman.podman_pod_info:
+    name: 'cortex-querier-pod'
+  register: pod_info
+
+- set_fact:
+    cortex_querier_id: '{{ [ pod_info.pods[0].State.infraContainerID ] }}'
+
+- name: get pod IP
+  containers.podman.podman_container_info:
+    name: '{{ cortex_querier_id }}'
+  register: querier_container_info
+
+- debug:
+    msg: '{{ querier_container_info }}'
+
+- set_fact:
+    cortex_querier_pod_ip: '{{ querier_container_info | json_query(query) }}'
+  vars:
+    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
+
+- debug:
+    msg: '{{ cortex_querier_pod_ip }}'
+
+- name: Setup Cortex Querier
+  containers.podman.podman_container:
+    name: 'cortex-querier'
+    image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
+    pod: 'cortex-querier-pod'
+    conmon_pidfile: '/var/lib/containers/pids/cortex-querier.pid'
+    volume:
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+    command: '-target=querier -config.file=/etc/cortex.yaml'
+    state: started
