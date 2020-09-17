@@ -1,6 +1,7 @@
 ---
 cortex_version: v1.3.0
 cortex_single_host_deployment: true
+cortex_hostname: cortex
 cortex_domain: example.com
 cortex_podman_network: podman
 cortex_http_listen_port: 9009
@@ -14,6 +15,7 @@ cortex_ingesters_with_wal: true
 cortex_distributor_replicas: 3
 cortex_distributor_kvstore_provider: etcd
 cortex_distributor_kvstore_prefix: ha-tracker/ 
+cortex_querier_replicas: 1
 cortex_limits_accept_ha_samples: true
 cortex_limits_ha_cluster_label: prometheus_cluster
 cortex_limits_ha_replica_label: prometheus_replica

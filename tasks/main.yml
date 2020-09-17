@@ -10,6 +10,10 @@
 - include_tasks: etcd.yml
 - include_tasks: cassandra.yml
 - include_tasks: cortex.yml
+- include_tasks: cortex-table-manager.yml
+- include_tasks: cortex-distributors.yml
+- include_tasks: cortex-ingesters.yml
+- include_tasks: cortex-queriers.yml
 - include_tasks: nginx.yml
 
 - debug:

@@ -1,0 +1,12 @@
+---
+- name: Setup Cortex Querier
+  containers.podman.podman_container:
+    name: 'cortex-querier-{{ item }}'
+    image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
+    network: host
+    conmon_pidfile: '/var/lib/containers/pids/cortex-querier.pid'
+    volume:
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+    command: '-target=querier -config.file=/etc/cortex.yaml'
+    state: started
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
