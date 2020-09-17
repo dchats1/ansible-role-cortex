@@ -3,7 +3,8 @@ cortex_version: v1.3.0
 cortex_single_host_deployment: true
 cortex_hostname: cortex
 cortex_domain: example.com
-cortex_podman_network: podman
+cortex_backend_podman_network: podman
+cortex_frontend_podman_network: host
 cortex_http_listen_port: 9009
 cortex_etcd_replicas: 3
 cortex_etcd_port: 2379

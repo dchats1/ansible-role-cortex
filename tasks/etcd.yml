@@ -3,7 +3,7 @@
   containers.podman.podman_pod:
     name: 'cortex-etcd-{{ item }}-pod'
     state: started
-    network: '{{ cortex_podman_network }}'
+    network: '{{ cortex_backend_podman_network }}'
     hostname: 'cortex-etcd-{{ item|string + "." + cortex_domain }}'
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
   when: cortex_single_host_deployment == true
@@ -28,7 +28,7 @@
 - set_fact:
     cortex_etcd_pod_ips: '{{ container_info | json_query(query) }}'
   vars:
-    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
+    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'
 
 - set_fact:
     cortex_etcd_endpoints: '{{ cortex_etcd_endpoints|default([]) + [ "http://" + item + ":" + (cortex_etcd_port|string) ] }}'

@@ -1,9 +1,16 @@
 ---
+- name: Create Frontend pod
+  containers.podman.podman_pod:
+    name: cortex-frontend-pod
+    state: started
+    network: '{{ cortex_frontend_podman_network }}'
+    hostname: '{{ cortex_hostname }}.{{ cortex_domain }}'
+
 - name: Setup Cortex Querier
   containers.podman.podman_container:
     name: 'cortex-querier-{{ item }}'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
-    network: host
+    pod: cortex-frontend-pod
     conmon_pidfile: '/var/lib/containers/pids/cortex-querier.pid'
     volume:
       - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'

@@ -10,7 +10,7 @@
   containers.podman.podman_pod:
     name: 'cortex-cassandra-{{ item }}-pod'
     state: started
-    network: '{{ cortex_podman_network }}'
+    network: '{{ cortex_backend_podman_network }}'
     hostname: 'cortex-cassandra-{{ item|string + "." + cortex_domain }}'
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
 
@@ -34,7 +34,7 @@
 - set_fact:
     cortex_cassandra_pod_ips: '{{ container_info | json_query(query) }}'
   vars:
-    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
+    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'
 
 - name: Setup Cassandra Cluster
   containers.podman.podman_container:

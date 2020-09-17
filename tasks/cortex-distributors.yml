@@ -3,7 +3,7 @@
   containers.podman.podman_pod:
     name: 'cortex-distributor-{{ item }}-pod'
     state: started
-    network: '{{ cortex_podman_network }}'
+    network: '{{ cortex_backend_podman_network }}'
     hostname: 'cortex-distributor-{{ item|string + "." + cortex_domain }}'
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
 
@@ -27,7 +27,7 @@
 - set_fact:
     cortex_distributor_pod_ips: '{{ container_info | json_query(query) }}'
   vars:
-    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_podman_network }}.IPAddress'
+    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'
 
 - name: Setup Cortex Distributors
   containers.podman.podman_container:
