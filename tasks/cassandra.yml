@@ -51,10 +51,17 @@
       CASSANDRA_RACK: "rack1"
       CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
     state: started
+  register: cassandra
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
+
+- pause:
+    prompt: "Waiting for Cassandra to start up..."
+    seconds: 30
+  when: cassandra.changed
 
 - name: Create Cortex keyspace
   shell: podman exec cortex-cassandra-0 cqlsh -e "{{ query }}"
+  changed_when: false
   vars:
     query: "CREATE KEYSPACE if NOT EXISTS {{ cortex_cassandra_keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor' : {{ cortex_cassandra_replication_factor }} };"
 
