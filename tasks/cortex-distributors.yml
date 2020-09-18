@@ -36,7 +36,7 @@
     pod: 'cortex-distributor-{{ item }}-pod'
     conmon_pidfile: '/var/lib/containers/pids/cortex-distributor-{{ item }}.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=distributor -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'

@@ -13,7 +13,7 @@
     pod: cortex-frontend-pod
     conmon_pidfile: '/var/lib/containers/pids/cortex-querier.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=querier -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_querier_replicas)|list }}'

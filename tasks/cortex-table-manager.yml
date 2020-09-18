@@ -6,6 +6,6 @@
     pod: 'cortex-cassandra-0-pod'
     conmon_pidfile: '/var/lib/containers/pids/cortex-table-manager.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:Z'
+      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=table-manager -cassandra.keyspace={{ cortex_cassandra_keyspace }} -config.file=/etc/cortex.yaml'
     state: started
