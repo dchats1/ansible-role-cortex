@@ -52,7 +52,7 @@ ingester:
     num_tokens: 512
 
     ring:
-      replication_factor: {{ cortex_etcd_replicas }}
+      replication_factor: {{ cortex_ingester_replicas }}
       kvstore:
         store: etcd
         prefix: {{ cortex_ingester_kvstore_prefix }}
