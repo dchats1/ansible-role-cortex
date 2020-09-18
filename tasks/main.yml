@@ -16,6 +16,13 @@
 - include_tasks: cortex-queriers.yml
 - include_tasks: nginx.yml
 
+- name: Open nginx port in firewalld
+  firewalld:
+    port: '{{ cortex_nginx_listen_port }}/tcp'
+    permanent: yes
+    state: enabled
+    immediate: yes
+
 - debug:
     msg: '{{ services_to_restart }}'
   notify: Restart Service

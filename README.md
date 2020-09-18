@@ -18,6 +18,7 @@ cortex_version                      | Version of Cortex to deploy. (Default: v1.
 cortex_single_host_deployment       | Deploy on a single host. Multi host currently not supported. (Default: true)
 cortex_hostname                     | Hostname. (Default: cortex)
 cortex_domain                       | Domain for Cortex. (Default: example.com)
+cortex_nginx_listen_port            | Port for Nginx to listen on. (Default: 80)
 cortex_backend_podman_network       | Podman Network for backend pods and containers. (Default: podman)
 cortex_frontend_podman_network      | Podman Network for frontend pods and containers. (Default: host)
 cortex_http_listen_port             | Default port for distributors to listen on. (Default: 9009)
