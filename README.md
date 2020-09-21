@@ -36,7 +36,7 @@ cortex_limits_accept_ha_samples     | Enable HA Tracker. (Default: true)
 cortex_querier_replicas             | Number of Querier replicas. Currently only 1 supported. (Default: 1)
 cortex_limits_ha_cluster_label      | Limits HA cluster label. (Default: prometheus_cluster)
 cortex_limits_ha_replica_label      | Limits HA replica label. (Default: prometheus_replica)
-cortex_cassandra_replicas           | Number of Cassandra replicas. (Default: 3)
+cortex_cassandra_replicas           | Number of Cassandra replicas. (Default: 1)
 cortex_cassandra_addresses          | Cassandra addresses. These are collected dynamically from each Cassandra pod.
 cortex_cassandra_keyspace           | Cortex keyspace in Cassandra. (Default: cortex)
 cortex_cassandra_replication_factor | Number of replicas in Cassandra. (Default: Matches `cortex_cassandra_replicas`)
