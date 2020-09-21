@@ -6,6 +6,23 @@
     network: '{{ cortex_frontend_podman_network }}'
     hostname: '{{ cortex_hostname }}.{{ cortex_domain }}'
 
+- name: Get Frontend Infra Containers
+  containers.podman.podman_pod_info:
+    name: cortex-frontend-pod
+  register: pod_info
+
+- set_fact:
+    cortex_frontend_id: '{{ cortex_frontend_id|default([]) + [ pod_info.pods[0].State.infraContainerID ] }}'
+
+- name: get pod IP
+  containers.podman.podman_container_info:
+    name: '{{ cortex_frontend_id }}'
+  register: container_info
+- set_fact:
+    cortex_frontend_pod_ip: '{{ container_info | json_query(query) }}'
+  vars:
+    query: 'containers[0].NetworkSettings.Networks.{{ cortex_frontend_podman_network }}.IPAddress'
+
 - name: Setup Cortex Querier
   containers.podman.podman_container:
     name: 'cortex-querier-{{ item }}'
