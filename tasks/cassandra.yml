@@ -56,7 +56,7 @@
 
 - pause:
     prompt: "Waiting for Cassandra to start up..."
-    seconds: 30
+    minutes: 1
   when: cassandra.changed
 
 - name: Create Cortex keyspace

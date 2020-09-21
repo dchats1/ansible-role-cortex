@@ -21,7 +21,7 @@ cortex_querier_replicas: 1
 cortex_limits_accept_ha_samples: true
 cortex_limits_ha_cluster_label: prometheus_cluster
 cortex_limits_ha_replica_label: prometheus_replica
-cortex_cassandra_replicas: 3
+cortex_cassandra_replicas: 1
 cortex_cassandra_addresses: []
 cortex_cassandra_keyspace: cortex
 cortex_cassandra_replication_factor: '{{ cortex_cassandra_replicas }}'
