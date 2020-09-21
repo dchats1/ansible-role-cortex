@@ -22,6 +22,7 @@
     permanent: yes
     state: enabled
     immediate: yes
+  when: cortex_frontend_podman_network == "host"
 
 - debug:
     msg: '{{ services_to_restart }}'
