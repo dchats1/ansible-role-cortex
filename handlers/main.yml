@@ -2,9 +2,3 @@
 - name: daemon-reload
   systemd:
     daemon-reload: yes
-
-- name: Restart Service
-  systemd:
-    name: '{{ item }}'
-    state: restarted
-  loop: '{{ services_to_restart }}'

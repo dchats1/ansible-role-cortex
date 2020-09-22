@@ -26,4 +26,14 @@
 
 - debug:
     msg: '{{ services_to_restart }}'
-  notify: Restart Service
+
+- name: daemon-reload
+  systemd:
+    daemon-reload: yes
+  when: services_to_restart | length > 0
+
+- name: Restart Service(s)
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+  loop: '{{ services_to_restart }}'
