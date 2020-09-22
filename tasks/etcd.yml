@@ -6,14 +6,12 @@
     network: '{{ cortex_backend_podman_network }}'
     hostname: 'cortex-etcd-{{ item|string + "." + cortex_domain }}'
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
-  when: cortex_single_host_deployment == true
 
 - name: Get infra pods
   containers.podman.podman_pod_info:
     name: 'cortex-etcd-{{ item|string }}-pod'
   register: pod_info
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
-  when: cortex_single_host_deployment == true
 
 - set_fact:
     cortex_etcd_ids: '{{ cortex_etcd_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'

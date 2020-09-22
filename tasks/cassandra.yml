@@ -20,7 +20,6 @@
     name: 'cortex-cassandra-{{ item|string }}-pod'
   register: pod_info
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
-  when: cortex_single_host_deployment == true
 
 - set_fact:
     cortex_cassandra_ids: '{{ cortex_cassandra_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'

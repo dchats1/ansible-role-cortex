@@ -12,7 +12,6 @@
     name: 'cortex-distributor-{{ item|string }}-pod'
   register: pod_info
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
-  when: cortex_single_host_deployment == true
 
 - set_fact:
     cortex_distributor_ids: '{{ cortex_distributor_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'

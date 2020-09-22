@@ -12,7 +12,6 @@
     name: 'cortex-ingester-{{ item|string }}-pod'
   register: pod_info
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
-  when: cortex_single_host_deployment == true
 
 - set_fact:
     cortex_ingester_ids: '{{ cortex_ingester_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'
