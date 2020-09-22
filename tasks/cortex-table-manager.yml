@@ -4,8 +4,8 @@
     name: 'cortex-table-manager'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     pod: 'cortex-cassandra-0-pod'
-    conmon_pidfile: '/var/lib/containers/pids/cortex-table-manager.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-table-manager.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
+      - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=table-manager -cassandra.keyspace={{ cortex_cassandra_keyspace }} -config.file=/etc/cortex.yaml'
     state: started

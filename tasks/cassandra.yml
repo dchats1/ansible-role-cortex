@@ -1,9 +1,10 @@
 ---
-- name: Make Cassandra data directories
-  file:
-    path: '/var/lib/containers/cassandra{{ item }}'
-    mode: '0755'
-    state: directory
+- name: Create Cassandra data volumes
+  containers.podman.podman_volume:
+    state: present
+    name: 'cortex-cassandra-{{ item }}-volume'
+    label:
+      app: cortex
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
 
 - name: Create Cassandra pods
@@ -41,9 +42,9 @@
     name: 'cortex-cassandra-{{ item }}'
     image: docker.io/library/cassandra:3.11
     pod: 'cortex-cassandra-{{ item }}-pod'
-    conmon_pidfile: '/var/lib/containers/pids/cassandra{{ item }}.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cassandra{{ item }}.pid'
     volume:
-      - '/var/lib/containers/cassandra{{ item }}:/var/lib/cassandra:Z'
+      - 'cortex-cassandra-{{ item }}-volume:/var/lib/cassandra:Z'
     env:
       CASSANDRA_SEEDS: "{{ cortex_cassandra_pod_ips | join(',') }}"
       CASSANDRA_CLUSTER_NAME: "cortex-bos2"

@@ -34,9 +34,9 @@
     name: 'cortex-ingester-{{ item }}'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     pod: 'cortex-ingester-{{ item }}-pod'
-    conmon_pidfile: '/var/lib/containers/pids/cortex-ingester-{{ item }}.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-ingester-{{ item }}.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
+      - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
   when: cortex_ingesters_with_wal|bool == False
@@ -47,10 +47,10 @@
     name: 'cortex-ingester-{{ item }}'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     pod: 'cortex-ingester-{{ item }}-pod'
-    conmon_pidfile: '/var/lib/containers/pids/cortex-ingester-{{ item }}.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-ingester-{{ item }}.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
-      - '/var/lib/containers/cortex-ingester-wal-{{ item }}:/wal:Z'
+      - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
+      - 'cortex-ingester-wal-{{ item }}-volume:/wal:Z'
     command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
   when: cortex_ingesters_with_wal|bool == True

@@ -4,7 +4,7 @@
 
 - name: Create pid file directory for containers
   file:
-    path: /var/lib/containers/pids/
+    path: '{{ cortex_base_dir }}/pids/'
     state: directory
 
 - include_tasks: etcd.yml

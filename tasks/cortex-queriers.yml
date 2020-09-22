@@ -28,9 +28,9 @@
     name: 'cortex-querier-{{ item }}'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     pod: cortex-frontend-pod
-    conmon_pidfile: '/var/lib/containers/pids/cortex-querier.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-querier.pid'
     volume:
-      - '/var/lib/containers/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
+      - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=querier -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_querier_replicas)|list }}'

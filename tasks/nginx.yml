@@ -2,7 +2,7 @@
 - name: Add nginx load balancer config
   template:
     src: nginx.conf
-    dest: /var/lib/containers/cortex-config/nginx.conf
+    dest: '{{ cortex_base_dir }}/cortex-config/nginx.conf'
     mode: '0644'
   register: nginx_conf
 
@@ -15,9 +15,9 @@
     name: cortex-loadbalancer
     image: docker.io/library/nginx:latest
     pod: cortex-frontend-pod
-    conmon_pidfile: '/var/lib/containers/pids/cortex-lb.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-lb.pid'
     volume:
-      - /var/lib/containers/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z
+      - '{{ cortex_base_dir }}/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z'
     state: started
 
 - name: Generate systemd files for nginx

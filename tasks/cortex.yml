@@ -1,22 +1,23 @@
 ---
 - name: Create Cortex config directory
   file:
-    path: /var/lib/containers/cortex-config/
+    path: '{{ cortex_base_dir }}/cortex-config/'
     mode: '0775'
     state: directory
 
-- name: Create Ingester WAL directories
-  file:
-    path: '/var/lib/containers/cortex-ingester-wal-{{ item }}'
-    mode: '0775'
-    state: directory
+- name: Create Ingester WAL volumes
+  containers.podman.podman_volume:
+    state: present
+    name: 'cortex-ingester-wal-{{ item }}-volume'
+    label:
+      app: cortex
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
 - name: Set Cortex conf file
   template:
     src: 'cortex.yaml'
-    dest: '/var/lib/containers/cortex-config/cortex.yaml'
+    dest: '{{ cortex_base_dir }}/cortex-config/cortex.yaml'
     mode: '0644'
   register: cortex_conf
 

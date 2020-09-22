@@ -47,7 +47,7 @@
     name: 'cortex-etcd-{{ item }}'
     image: quay.io/coreos/etcd:v3.4.9
     pod: 'cortex-etcd-{{ item }}-pod'
-    conmon_pidfile: '/var/lib/containers/pids/cortex-etcd-{{ item }}.pid'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-etcd-{{ item }}.pid'
     volume:
       - /etc/pki/ca-trust/extracted/pem/:/etc/ssl/certs:z
     command: '/usr/local/bin/etcd --name etcd{{ item }} --auto-compaction-retention=1 --advertise-client-urls http://{{ cortex_etcd_pod_ips[ item ] }}:2379,http://{{ cortex_etcd_pod_ips[ item ] }}:4001 --listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 --initial-advertise-peer-urls http://{{ cortex_etcd_pod_ips[ item ] }}:2380 --listen-peer-urls http://0.0.0.0:2380 --initial-cluster-token etcd-cluster-1 --initial-cluster {{ cortex_etcd_initial_cluster | join(",") }} --initial-cluster-state new'

@@ -7,6 +7,7 @@ cortex_manage_firewalld: false
 cortex_nginx_listen_port: 80
 cortex_backend_podman_network: podman
 cortex_frontend_podman_network: host
+cortex_base_dir: /var/lib/containers
 cortex_http_listen_port: 9009
 cortex_etcd_replicas: 3
 cortex_etcd_port: 2379

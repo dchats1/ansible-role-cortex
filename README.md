@@ -22,6 +22,7 @@ cortex_manage_firewalld             | Open up nginx listen port in firewalld. (D
 cortex_nginx_listen_port            | Port for Nginx to listen on. (Default: 80)
 cortex_backend_podman_network       | Podman Network for backend pods and containers. (Default: podman)
 cortex_frontend_podman_network      | Podman Network for frontend pods and containers. (Default: host)
+cortex_base_dir                     | Base directory for cortex config and pid files. (Default: /var/lib/containers)
 cortex_http_listen_port             | Default port for distributors to listen on. (Default: 9009)
 cortex_etcd_replicas                | Number of etcd replicas. (Default: 3)
 cortex_etcd_port                    | Etcd port. (Default: 2379)
