@@ -3,6 +3,7 @@ cortex_version: v1.3.0
 cortex_single_host_deployment: true
 cortex_hostname: cortex
 cortex_domain: example.com
+cortex_manage_firewalld: false
 cortex_nginx_listen_port: 80
 cortex_backend_podman_network: podman
 cortex_frontend_podman_network: host
