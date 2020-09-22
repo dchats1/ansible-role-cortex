@@ -45,7 +45,7 @@
 - name: Setup Etcd Cluster
   containers.podman.podman_container:
     name: 'cortex-etcd-{{ item }}'
-    image: quay.io/coreos/etcd:v3.4.9
+    image: 'quay.io/coreos/etcd:{{ cortex_etcd_version }}'
     pod: 'cortex-etcd-{{ item }}-pod'
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-etcd-{{ item }}.pid'
     volume:

@@ -9,6 +9,7 @@ cortex_backend_podman_network: podman
 cortex_frontend_podman_network: host
 cortex_base_dir: /var/lib/containers
 cortex_http_listen_port: 9009
+cortex_etcd_version: v3.4.9
 cortex_etcd_replicas: 3
 cortex_etcd_port: 2379
 cortex_etcd_replication_factor: '{{ cortex_etcd_replicas }}'
@@ -23,6 +24,7 @@ cortex_querier_replicas: 1
 cortex_limits_accept_ha_samples: true
 cortex_limits_ha_cluster_label: prometheus_cluster
 cortex_limits_ha_replica_label: prometheus_replica
+cortex_cassandra_version: 3.11
 cortex_cassandra_replicas: 1
 cortex_cassandra_addresses: []
 cortex_cassandra_keyspace: cortex

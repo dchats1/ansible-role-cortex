@@ -40,7 +40,7 @@
 - name: Setup Cassandra Cluster
   containers.podman.podman_container:
     name: 'cortex-cassandra-{{ item }}'
-    image: docker.io/library/cassandra:3.11
+    image: 'docker.io/library/cassandra:{{ cortex_cassandra_version }}'
     pod: 'cortex-cassandra-{{ item }}-pod'
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cassandra{{ item }}.pid'
     volume:
