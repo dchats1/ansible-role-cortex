@@ -40,6 +40,14 @@
     state: started
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
 
+- set_fact:
+    cortex_distributor_containers: '{{ cortex_distributor_containers|default([]) + [ "cortex-distributor-" +  item|string ] }}'
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+
+- name: Generate systemd files for distributors
+  include_tasks: systemd.yml
+  loop: '{{ cortex_distributor_containers }}'
+
 # Cleanup/scale down
 - name: Get list of all distributor pods
   shell: /usr/bin/podman pod ps | grep -o -e 'cortex-distributor-[0-9]\+-pod'
