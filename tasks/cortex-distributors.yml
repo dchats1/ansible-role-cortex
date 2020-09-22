@@ -39,3 +39,29 @@
     command: '-target=distributor -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+
+# Cleanup/scale down
+- name: Get list of all distributor pods
+  shell: /usr/bin/podman pod ps | grep -o -e 'cortex-distributor-[0-9]\+-pod'
+  register: distributor_pods
+  changed_when: false
+
+- set_fact:
+    pods_in_use: "{{ pods_in_use|default([]) + [ 'cortex-distributor-' + item|string + '-pod' ] }}"
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+
+- set_fact:
+    pods_to_cleanup: '{{ distributor_pods.stdout_lines }}'
+
+- set_fact:
+    pods_to_cleanup: "{{ pods_to_cleanup | difference(pods_in_use) }}"
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+
+- debug:
+    msg: '{{ pods_to_cleanup }}'
+
+- name: Cleanup unused Distributor pods
+  containers.podman.podman_pod:
+    name: '{{ item }}'
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
