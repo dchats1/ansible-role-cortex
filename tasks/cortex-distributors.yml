@@ -66,10 +66,17 @@
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
 
 - debug:
-    msg: '{{ pods_to_cleanup }}'
+    msg: 'Distributor pods to clean up: {{ pods_to_cleanup }}'
 
 - name: Cleanup unused Distributor pods
   containers.podman.podman_pod:
     name: '{{ item }}'
     state: absent
   loop: '{{ pods_to_cleanup }}'
+
+- name: Cleanup unused Distributor service files
+  file:
+    path: "/etc/systemd/system/container-{{ item | regex_replace('-pod') }}.service"
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
+  notify: daemon-reload
