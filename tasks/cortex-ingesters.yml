@@ -54,3 +54,81 @@
     state: started
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+
+- set_fact:
+    cortex_ingester_containers: '{{ cortex_ingester_containers|default([]) + [ "cortex-ingester-" +  item|string ] }}'
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+
+- name: Generate systemd files for ingesters
+  include_tasks: systemd.yml
+  loop: '{{ cortex_ingester_containers }}'
+
+# Cleanup/scale down
+- name: Get list of all ingester pods
+  shell: /usr/bin/podman pod ps | grep -o -e 'cortex-ingester-[0-9]\+-pod'
+  register: ingester_pods
+  changed_when: false
+
+- set_fact:
+    pods_in_use: "{{ pods_in_use|default([]) + [ 'cortex-ingester-' + item|string + '-pod' ] }}"
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+
+- set_fact:
+    pods_to_cleanup: '{{ ingester_pods.stdout_lines }}'
+
+- set_fact:
+    pods_to_cleanup: "{{ pods_to_cleanup | difference(pods_in_use) }}"
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+
+- name: Get list of all ingester wal volumes
+  shell: /usr/bin/podman volume ls | grep -o -e 'cortex-ingester-wal-[0-9]\+-volume'
+  register: ingester_volumes
+  changed_when: false
+  when: cortex_ingesters_with_wal|bool == True
+
+- set_fact:
+    volumes_in_use: "{{ volumes_in_use|default([]) + [ 'cortex-ingester-wal-' + item|string + '-volume' ] }}"
+  when: cortex_ingesters_with_wal|bool == True
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+
+- set_fact:
+    volumes_to_cleanup: '{{ ingester_volumes.stdout_lines }}'
+  when: cortex_ingesters_with_wal|bool == True
+
+- set_fact:
+    volumes_to_cleanup: "{{ volumes_to_cleanup | difference(volumes_in_use) }}"
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+  when: cortex_ingesters_with_wal|bool == True
+
+- debug:
+    msg: 'Ingester pods to clean up: {{ pods_to_cleanup }}'
+
+- debug:
+    msg: 'Ingester volumes to clean up: {{ volumes_to_cleanup }}'
+
+- name: Stop unused Ingesters
+  systemd:
+    name: "container-{{ item | regex_replace('-pod') }}.service"
+    state: stopped
+    enabled: no
+  loop: '{{ pods_to_cleanup }}'
+
+- name: Cleanup unused Ingester pods
+  containers.podman.podman_pod:
+    name: '{{ item }}'
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
+
+- name: Cleanup unused Ingester WAL volumes
+  containers.podman.podman_volume:
+    name: '{{ item }}'
+    state: absent
+  loop: '{{ volumes_to_cleanup }}'
+  when: cortex_ingesters_with_wal|bool == True
+
+- name: Cleanup unused Ingester service files
+  file:
+    path: "/etc/systemd/system/container-{{ item | regex_replace('-pod') }}.service"
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
+  notify: daemon-reload

@@ -4,7 +4,7 @@ Cortex
 Deploys a Cortex Cluster on Podman. Uses etcd and Cassandra.
 https://cortexmetrics.io/
 
-By adjusting the replica variables all cortex services can be scaled up, and distributors can be scaled down.
+By adjusting the replica variables all cortex services can be scaled up. Distributors and Ingesters can be scaled down.
 
 Requirements
 ------------
@@ -30,6 +30,7 @@ cortex_etcd_replicas                | Number of etcd replicas. (Default: 3)
 cortex_etcd_port                    | Etcd port. (Default: 2379)
 cortex_etcd_replication_factor      | Etcd replica factor. (Default: Matches `cortex_etcd_replicas`)
 cortex_ingester_replicas            | Cortex Ingester replicas. (Default: 3)
+cortex_ingester_replication_factor  | Cortex Ingeseter replication factor. (Default: 3)
 cortex_ingester_kvstore_provider    | Cortex Ingester KV provider. Only etcd supported right now. (Default: etcd)
 cortex_ingester_kvstore_prefix      | Cortex Ingester KV prefix. (Default: collectors/)
 cortex_ingesters_with_wal           | Use Ingesters with WAL. (Default: true)
