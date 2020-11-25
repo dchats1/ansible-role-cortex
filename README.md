@@ -4,7 +4,7 @@ Cortex
 Deploys a Cortex Cluster on Podman. Uses etcd and Cassandra.
 https://cortexmetrics.io/
 
-By adjusting the replica variables all cortex services can be scaled up. Distributors and Ingesters can be scaled down.
+By adjusting the replica variables all cortex services can be scaled up. Distributors, Ingesters and Queriers can be scaled down.
 
 Requirements
 ------------
