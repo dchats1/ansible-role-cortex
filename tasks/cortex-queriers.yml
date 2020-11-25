@@ -1,34 +1,39 @@
 ---
-- name: Create Frontend pod
+- name: Create Querier pods
   containers.podman.podman_pod:
-    name: cortex-frontend-pod
+    name: 'cortex-querier-{{ item }}-pod'
     state: started
-    network: '{{ cortex_frontend_podman_network }}'
-    hostname: '{{ cortex_hostname }}.{{ cortex_domain }}'
+    network: '{{ cortex_backend_podman_network }}'
+    hostname: 'cortex-querier-{{ item|string + "." + cortex_domain }}'
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
-- name: Get Frontend Infra Containers
+- name: Get Querier Infra Containers
   containers.podman.podman_pod_info:
-    name: cortex-frontend-pod
+    name: 'cortex-querier-{{ item|string }}-pod'
   register: pod_info
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
 - set_fact:
-    cortex_frontend_id: '{{ cortex_frontend_id|default([]) + [ pod_info.pods[0].State.infraContainerID ] }}'
+    cortex_querier_ids: '{{ cortex_querier_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
 - name: get pod IP
   containers.podman.podman_container_info:
-    name: '{{ cortex_frontend_id }}'
+    name: '{{ item }}'
   register: container_info
-- set_fact:
-    cortex_frontend_pod_ip: '{{ container_info | json_query(query) }}'
-  vars:
-    query: 'containers[0].NetworkSettings.Networks.{{ cortex_frontend_podman_network }}.IPAddress'
+  loop: '{{ cortex_querier_ids }}'
 
-- name: Setup Cortex Querier
+- set_fact:
+    cortex_querier_pod_ips: '{{ container_info | json_query(query) }}'
+  vars:
+    query: 'results[*].containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'
+
+- name: Setup Cortex Queriers
   containers.podman.podman_container:
     name: 'cortex-querier-{{ item }}'
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
-    pod: cortex-frontend-pod
-    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-querier.pid'
+    pod: 'cortex-querier-{{ item }}-pod'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-querier-{{ item }}.pid'
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=querier -config.file=/etc/cortex.yaml'
@@ -36,9 +41,42 @@
   loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
 - set_fact:
-    cortex_querier_containers: '{{ cortex_querier_containers|default([]) + [ "cortex-querier-" + item|string ] }}'
+    cortex_querier_containers: '{{ cortex_querier_containers|default([]) + [ "cortex-querier-" +  item|string ] }}'
   loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
-- name: Generate systemd files for Queriers
+- name: Generate systemd files for queriers
   include_tasks: systemd.yml
   loop: '{{ cortex_querier_containers }}'
+
+# Cleanup/scale down
+- name: Get list of all querier pods
+  shell: /usr/bin/podman pod ps | grep -o -e 'cortex-querier-[0-9]\+-pod'
+  register: querier_pods
+  changed_when: false
+
+- set_fact:
+    pods_in_use: "{{ pods_in_use|default([]) + [ 'cortex-querier-' + item|string + '-pod' ] }}"
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
+
+- set_fact:
+    pods_to_cleanup: '{{ querier_pods.stdout_lines }}'
+
+- set_fact:
+    pods_to_cleanup: "{{ pods_to_cleanup | difference(pods_in_use) }}"
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
+
+- debug:
+    msg: 'Querier pods to clean up: {{ pods_to_cleanup }}'
+
+- name: Cleanup unused Querier pods
+  containers.podman.podman_pod:
+    name: '{{ item }}'
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
+
+- name: Cleanup unused Querier service files
+  file:
+    path: "/etc/systemd/system/container-{{ item | regex_replace('-pod') }}.service"
+    state: absent
+  loop: '{{ pods_to_cleanup }}'
+  notify: daemon-reload
