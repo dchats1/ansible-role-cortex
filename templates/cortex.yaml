@@ -1,4 +1,4 @@
-auth_enabled: false
+auth_enabled: {{ cortex_auth_enabled }}
 server:
   http_listen_port: {{ cortex_http_listen_port }}
   grpc_listen_port: 9095

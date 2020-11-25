@@ -30,3 +30,7 @@
     services_to_restart: '{{ services_to_restart + [ "container-cortex-distributor-" + item|string + ".service" ] }}'
   loop: '{{ range(0, cortex_distributor_replicas)|list }}'
   when: cortex_conf.changed
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-table-manager.service" ] }}'
+  when: cortex_conf.changed
