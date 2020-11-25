@@ -9,3 +9,8 @@
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=table-manager -cassandra.keyspace={{ cortex_cassandra_keyspace }} -config.file=/etc/cortex.yaml'
     state: started
+
+- name: Generate systemd files for Table Manager
+  include_tasks: systemd.yml
+  loop:
+    - cortex-table-manager
