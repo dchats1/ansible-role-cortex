@@ -34,3 +34,8 @@
 - set_fact:
     services_to_restart: '{{ services_to_restart + [ "container-cortex-table-manager.service" ] }}'
   when: cortex_conf.changed
+
+- set_fact:
+    services_to_restart: '{{ services_to_restart + [ "container-cortex-querier-" + item|string + ".service" ] }}'
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
+  when: cortex_conf.changed

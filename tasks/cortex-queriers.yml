@@ -34,3 +34,11 @@
     command: '-target=querier -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_querier_replicas)|list }}'
+
+- set_fact:
+    cortex_querier_containers: '{{ cortex_querier_containers|default([]) + [ "cortex-querier-" + item|string ] }}'
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
+
+- name: Generate systemd files for Queriers
+  include_tasks: systemd.yml
+  loop: '{{ cortex_querier_containers }}'
