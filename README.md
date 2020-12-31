@@ -16,7 +16,7 @@ Role Variables
 
 Variable                            | Description
 ------------------------------------|------------------------------------------------------------------------
-cortex_version                      | Version of Cortex to deploy. (Default: v1.3.0)
+cortex_version                      | Version of Cortex to deploy. (Default: v1.6.0)
 cortex_hostname                     | Hostname. (Default: cortex)
 cortex_domain                       | Domain for Cortex. (Default: example.com)
 cortex_manage_firewalld             | Open up nginx listen port in firewalld. (Default: false)
