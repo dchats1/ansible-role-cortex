@@ -14,7 +14,6 @@
   containers.podman.podman_container:
     name: cortex-loadbalancer
     image: docker.io/library/nginx:latest
-    pod: cortex-frontend-pod
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-lb.pid'
     volume:
       - '{{ cortex_base_dir }}/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z'

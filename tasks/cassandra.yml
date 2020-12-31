@@ -22,7 +22,7 @@
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
 
 - set_fact:
-    cortex_cassandra_ids: '{{ cortex_cassandra_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'
+    cortex_cassandra_ids: '{{ cortex_cassandra_ids|default([]) + [ pod_info.results[ item ].pods[0].InfraContainerID ] }}'
   loop: '{{ range(0, cortex_cassandra_replicas)|list }}'
 
 - name: get pod IP

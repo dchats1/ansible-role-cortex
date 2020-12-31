@@ -14,7 +14,7 @@
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
 
 - set_fact:
-    cortex_etcd_ids: '{{ cortex_etcd_ids|default([]) + [ pod_info.results[ item ].pods[0].State.infraContainerID ] }}'
+    cortex_etcd_ids: '{{ cortex_etcd_ids|default([]) + [ pod_info.results[ item ].pods[0].InfraContainerID ] }}'
   loop: '{{ range(0, cortex_etcd_replicas)|list }}'
 
 - name: get pod IP

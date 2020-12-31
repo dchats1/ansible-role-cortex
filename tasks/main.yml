@@ -25,7 +25,7 @@
   when: cortex_manage_firewalld and cortex_frontend_podman_network == "host"
 
 - debug:
-    msg: '{{ services_to_restart }}'
+    msg: 'Services to restart: {{ services_to_restart }}'
 
 - name: daemon-reload
   systemd:
@@ -37,3 +37,14 @@
     name: '{{ item }}'
     state: restarted
   loop: '{{ services_to_restart }}'
+
+- name: Get Load Balancer IP
+  containers.podman.podman_container_info:
+    name:  cortex-loadbalancer
+  register: loadbalancer_info
+
+- set_fact:
+    cortex_loadbalancer_ip: '{{ loadbalancer_info.containers[0].NetworkSettings.IPAddress }}'
+
+- debug:
+    msg: 'Cortex Load Balancer IP: {{ cortex_loadbalancer_ip }}'
