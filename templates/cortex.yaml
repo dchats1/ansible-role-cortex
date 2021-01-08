@@ -67,6 +67,44 @@ limits:
   ha_cluster_label: {{ cortex_limits_ha_cluster_label }}
   ha_replica_label: {{ cortex_limits_ha_replica_label }}
 
+{% if cortex_storage_engine == "blocks" %}
+storage:
+  engine: blocks
+
+blocks_storage:
+  backend: s3
+  s3:
+    insecure: {{ cortex_s3_insecure }}
+    bucket_name: {{ cortex_s3_bucket_name }}
+    endpoint: {{ cortex_s3_endpoint }}
+    secret_access_key: {{ cortex_s3_secret_access_key }}
+    access_key_id: {{ cortex_s3_access_key_id }}
+  tsdb:
+    wal_compression_enabled: true
+    flush_blocks_on_shutdown: true
+
+store_gateway:
+  sharding_enabled: true
+  sharding_ring:
+    kvstore:
+      store: etcd
+      etcd:
+        endpoints:
+{% for endpoint in cortex_etcd_endpoints %}
+          - {{ endpoint }}
+{% endfor %}
+compactor:
+  data_dir: /compactor
+  sharding_ring:
+    kvstore:
+      store: etcd
+      etcd:
+        endpoints:
+{% for endpoint in cortex_etcd_endpoints %}
+          - {{ endpoint }}
+{% endfor %}
+{% endif %}
+{% if cortex_storage_engine == "chunks" %}
 schema:
   configs:
   - from: 2020-07-07
@@ -85,3 +123,4 @@ storage:
     addresses: {{ cortex_cassandra_pod_ips|join(',') }}
     keyspace: {{ cortex_cassandra_keyspace }}
     replication_factor: {{ cortex_cassandra_replication_factor }}
+{% endif %}

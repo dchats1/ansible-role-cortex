@@ -14,6 +14,30 @@
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
+- name: Create Ingester TSDB volume
+  containers.podman.podman_volume:
+    state: present
+    name: 'cortex-ingester-tsdb-volume'
+    label:
+      app: cortex
+  when: cortex_storage_engine == 'blocks'
+
+- name: Create Ingester TSDB Sync volume
+  containers.podman.podman_volume:
+    state: present
+    name: 'cortex-ingester-tsdb-sync-volume'
+    label:
+      app: cortex
+  when: cortex_storage_engine == 'blocks'
+
+- name: Create Compactor volume
+  containers.podman.podman_volume:
+    state: present
+    name: 'cortex-ingester-tsdb-sync-volume'
+    label:
+      app: cortex
+  when: cortex_storage_engine == 'blocks'
+
 - name: Set Cortex conf file
   template:
     src: 'cortex.yaml'

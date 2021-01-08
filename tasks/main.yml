@@ -9,8 +9,14 @@
 
 - include_tasks: etcd.yml
 - include_tasks: cassandra.yml
+  when: cortex_storage_engine == 'chunks'
 - include_tasks: cortex.yml
 - include_tasks: cortex-table-manager.yml
+  when: cortex_storage_engine == 'chunks'
+- include_tasks: cortex-compactor.yml
+  when: cortex_storage_engine == 'blocks'
+- include_tasks: cortex-store-gateway.yml
+  when: cortex_storage_engine == 'blocks'
 - include_tasks: cortex-distributors.yml
 - include_tasks: cortex-ingesters.yml
 - include_tasks: cortex-queriers.yml

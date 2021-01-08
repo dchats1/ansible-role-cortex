@@ -1,0 +1,26 @@
+---
+- name: Setup Cortex Store Gateway
+  containers.podman.podman_container:
+    name: cortex-store-gateway
+    image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-store-gateway.pid'
+    network: '{{ cortex_backend_podman_network }}'
+    volume:
+      - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
+    command: '-target=store-gateway -config.file=/etc/cortex.yaml'
+    state: started
+
+- name: Generate systemd files for store gateway
+  include_tasks: systemd.yml
+  loop:
+    - cortex-store-gateway
+
+- name: Get Container info
+  containers.podman.podman_container_info:
+    name: cortex-store-gateway
+  register: container_info
+
+- set_fact:
+    cortex_store_gateway_ip: '{{ container_info | json_query(query) }}'
+  vars:
+    query: 'containers[0].NetworkSettings.Networks.{{ minio_podman_network }}.IPAddress'
