@@ -50,8 +50,8 @@
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
       - 'cortex-ingester-wal-{{ item }}-volume:/wal'
-      - cortex-ingester-tsdb-volume:/tsdb
-      - cortex-ingester-tsdb-sync-volume:/tsdb-sync
+      - 'cortex-ingester-tsdb-{{ item }}-volume:/tsdb'
+      - 'cortex-ingester-tsdb-sync-{{ item }}-volume:/tsdb-sync'
     command: '-target=ingester -config.file=/etc/cortex.yaml'
     state: started
   when: cortex_ingesters_with_wal|bool == True
