@@ -19,6 +19,7 @@
   when: cortex_storage_engine == 'blocks'
 - include_tasks: cortex-distributors.yml
 - include_tasks: cortex-ingesters.yml
+- include_tasks: cortex-query-frontend.yml
 - include_tasks: cortex-queriers.yml
 - include_tasks: nginx.yml
 
