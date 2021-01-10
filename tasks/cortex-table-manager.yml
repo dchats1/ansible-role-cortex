@@ -14,3 +14,9 @@
   include_tasks: systemd.yml
   loop:
     - cortex-table-manager
+
+- name: Restart Service(s)
+  systemd:
+    name: container-cortex-table-manager.service
+    state: restarted
+  when: cortex_conf.changed and cortex_storage_engine == 'chunks'

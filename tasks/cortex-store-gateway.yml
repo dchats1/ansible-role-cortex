@@ -15,6 +15,12 @@
   loop:
     - cortex-store-gateway
 
+- name: Restart Service
+  systemd:
+    name: container-cortex-store-gateway.service
+    state: restarted
+  when: cortex_conf.changed
+
 - name: Get Container info
   containers.podman.podman_container_info:
     name: cortex-store-gateway

@@ -67,6 +67,22 @@ limits:
   ha_cluster_label: {{ cortex_limits_ha_cluster_label }}
   ha_replica_label: {{ cortex_limits_ha_replica_label }}
 
+query_range:
+  split_queries_by_interval: 24h
+  results_cache:
+    cache:
+      background:
+        writeback_goroutines: 10
+        writeback_buffer: 10000
+      memcached:
+        expiration: 0s
+        batch_size: 1024
+        parallelism: 100
+      memcached_client:
+        service: memcached
+        addresses: {{ cortex_memcached_ip }}:11211
+  cache_results: true
+
 {% if cortex_storage_engine == "blocks" %}
 storage:
   engine: blocks

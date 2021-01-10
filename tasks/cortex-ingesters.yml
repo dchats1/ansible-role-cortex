@@ -65,6 +65,13 @@
   include_tasks: systemd.yml
   loop: '{{ cortex_ingester_containers }}'
 
+- name: Restart Service(s)
+  systemd:
+    name: 'container-cortex-ingester-{{ item }}.service'
+    state: restarted
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
+  when: cortex_conf.changed
+
 # Cleanup/scale down
 - name: Get list of all ingester pods
   shell: /usr/bin/podman pod ps | grep -o -e 'cortex-ingester-[0-9]\+-pod'

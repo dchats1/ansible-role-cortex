@@ -2,3 +2,8 @@
 - name: daemon-reload
   systemd:
     daemon-reload: yes
+
+- name: Restart Nginx
+  systemd:
+    name: container-cortex-loadbalancer.service
+    state: restarted

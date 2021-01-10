@@ -48,6 +48,13 @@
   include_tasks: systemd.yml
   loop: '{{ cortex_distributor_containers }}'
 
+- name: Restart Service(s)
+  systemd:
+    name: 'container-cortex-distributor-{{ item }}.service'
+    state: restarted
+  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
+  when: cortex_conf.changed
+
 # Cleanup/scale down
 - name: Get list of all distributor pods
   shell: /usr/bin/podman pod ps | grep -o -e 'cortex-distributor-[0-9]\+-pod'

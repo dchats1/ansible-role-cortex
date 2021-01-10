@@ -1,7 +1,4 @@
 ---
-- set_fact:
-    services_to_restart: []
-
 - name: Create pid file directory for containers
   file:
     path: '{{ cortex_base_dir }}/pids/'
@@ -10,6 +7,7 @@
 - include_tasks: etcd.yml
 - include_tasks: cassandra.yml
   when: cortex_storage_engine == 'chunks'
+- include_tasks: cortex-memcached.yml
 - include_tasks: cortex.yml
 - include_tasks: cortex-table-manager.yml
   when: cortex_storage_engine == 'chunks'
@@ -30,20 +28,6 @@
     state: enabled
     immediate: yes
   when: cortex_manage_firewalld and cortex_frontend_podman_network == "host"
-
-- debug:
-    msg: 'Services to restart: {{ services_to_restart }}'
-
-- name: daemon-reload
-  systemd:
-    daemon-reload: yes
-  when: services_to_restart | length > 0
-
-- name: Restart Service(s)
-  systemd:
-    name: '{{ item }}'
-    state: restarted
-  loop: '{{ services_to_restart }}'
 
 - name: Get Load Balancer IP
   containers.podman.podman_container_info:
