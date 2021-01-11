@@ -10,11 +10,19 @@
     services_to_restart: '{{ services_to_restart + [ "container-cortex-loadbalancer.service" ] }}'
   when: nginx_conf.changed
 
+- name: Create Distributor pods
+  containers.podman.podman_pod:
+    name: cortex-loadbalancer-pod
+    state: started
+    network: '{{ cortex_frontend_podman_network }}'
+    hostname: '{{ cortex_hostname}}.{{ cortex_domain }}'
+
 - name: Setup Nginx LoadBalancer
   containers.podman.podman_container:
     name: cortex-loadbalancer
     image: docker.io/library/nginx:latest
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-lb.pid'
+    pod: cortex-loadbalancer-pod
     volume:
       - '{{ cortex_base_dir }}/cortex-config/nginx.conf:/etc/nginx/nginx.conf:Z'
     state: started
