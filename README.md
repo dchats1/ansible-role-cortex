@@ -1,7 +1,10 @@
 Cortex
 =========
 
-Deploys a Cortex Cluster on Podman. Uses etcd and Cassandra.
+Deploys a Cortex Cluster on Podman. Uses etcd as the key value store. Default storage engine is Chunks, and the role will deploy Cassandra by default. Blocks storage is also supported, but currently only works with s3 compatible object stores. If you don't have an object store I have written a separate role to deploy MinIO:
+https://gitlab.com/dchats1/ansible-role-minio
+
+For more information about Cortex:
 https://cortexmetrics.io/
 
 By adjusting the replica variables all cortex services can be scaled up. Distributors, Ingesters and Queriers can be scaled down.
@@ -10,6 +13,7 @@ Requirements
 ------------
 
 This requires the containers.podman collection: https://galaxy.ansible.com/containers/podman
+I recommend 1.4.0 or later.
 
 Role Variables
 --------------
@@ -57,9 +61,7 @@ cortex_s3_insecure                  | Use http for s3 endpoint. (Default: false)
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: cortex
+    - hosts: podman_host
       roles:
          - cortex
 
