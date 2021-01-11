@@ -1,9 +1,16 @@
 ---
+- name: Create Memcached Pod
+  containers.podman.podman_pod:
+    name: cortex-memcached-pod
+    state: started
+    network: '{{ cortex_backend_podman_network }}'
+    hostname: 'cortex-memcached.{{ cortex_domain }}'
+ 
 - name: Setup Memcached
   containers.podman.podman_container:
     name: cortex-memcached
     image: memcached
-    network: '{{ cortex_backend_podman_network }}'
+    pod: cortex-memcached-pod
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-memcached.pid'
     command: 'memcached -m 1024 -vv'
     state: started
@@ -13,11 +20,20 @@
   loop:
     - cortex-memcached
 
-- name: Get Container info
-  containers.podman.podman_container_info:
-    name: cortex-memcached
-  register: container_info
+- name: Get Memecached pod infra container
+  containers.podman.podman_pod_info:
+    name:  cortex-memcached-pod
+  register: pod_info
+
 - set_fact:
-    cortex_memcached_ip: '{{ container_info | json_query(query) }}'
+    cortex_memcached_id: '{{ pod_info.pods[0].InfraContainerID }}'
+
+- name: Get Memcached Pod IP
+  containers.podman.podman_container_info:
+    name: '{{ cortex_memcached_id }}'
+  register: container_info
+
+- set_fact:
+    cortex_memcached_pod_ip: '{{ container_info | json_query(query) }}'
   vars:
     query: 'containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'

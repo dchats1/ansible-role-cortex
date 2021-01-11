@@ -80,7 +80,7 @@ query_range:
         parallelism: 100
       memcached_client:
         service: memcached
-        addresses: {{ cortex_memcached_ip }}:11211
+        addresses: {{ cortex_memcached_pod_ip }}:11211
   cache_results: true
 
 {% if cortex_storage_engine == "blocks" %}
