@@ -30,12 +30,22 @@
   when: cortex_manage_firewalld and cortex_frontend_podman_network == "host"
 
 - name: Get Load Balancer IP
-  containers.podman.podman_container_info:
-    name:  cortex-loadbalancer
-  register: loadbalancer_info
+  containers.podman.podman_pod_info:
+    name:  cortex-loadbalancer-pod
+  register: pod_info
 
 - set_fact:
-    cortex_loadbalancer_ip: '{{ loadbalancer_info.containers[0].NetworkSettings.IPAddress }}'
+    cortex_loadbalancer_id: '{{ pod_info.pods[0].InfraContainerID }}'
+
+- name: get pod IP
+  containers.podman.podman_container_info:
+    name: '{{ cortex_loadbalancer_id }}'
+  register: container_info
+
+- set_fact:
+    cortex_loadbalancer_pod_ip: '{{ container_info | json_query(query) }}'
+  vars:
+    query: 'containers[0].NetworkSettings.Networks.{{ cortex_frontend_podman_network }}.IPAddress'
 
 - debug:
-    msg: 'Cortex Load Balancer IP: {{ cortex_loadbalancer_ip }}'
+    msg: 'Cortex Load Balancer IP: {{ cortex_loadbalancer_pod_ip }}'

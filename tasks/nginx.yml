@@ -6,7 +6,7 @@
     mode: '0644'
   notify: Restart Nginx
 
-- name: Create Distributor pods
+- name: Create Load Balancer pod
   containers.podman.podman_pod:
     name: cortex-loadbalancer-pod
     state: started
