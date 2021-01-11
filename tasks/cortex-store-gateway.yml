@@ -1,10 +1,17 @@
 ---
+- name: Create Store Gateway Pod
+  containers.podman.podman_pod:
+    name: cortex-store-gateway-pod
+    state: started
+    network: '{{ cortex_backend_podman_network }}'
+    hostname: 'cortex-store-gateway.{{ cortex_domain }}'
+
 - name: Setup Cortex Store Gateway
   containers.podman.podman_container:
     name: cortex-store-gateway
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-store-gateway.pid'
-    network: '{{ cortex_backend_podman_network }}'
+    pod: cortex-store-gateway-pod
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
     command: '-target=store-gateway -config.file=/etc/cortex.yaml'
@@ -21,12 +28,20 @@
     state: restarted
   when: cortex_conf.changed
 
-- name: Get Container info
+- name: Get Store Gateway pod infra container
+  containers.podman.podman_pod_info:
+    name:  cortex-store-gateway-pod
+  register: pod_info
+
+- set_fact:
+    cortex_store_gateway_id: '{{ pod_info.pods[0].InfraContainerID }}'
+
+- name: Get Store Gateway Pod IP
   containers.podman.podman_container_info:
-    name: cortex-store-gateway
+    name: '{{ cortex_store_gateway_id }}'
   register: container_info
 
 - set_fact:
-    cortex_store_gateway_ip: '{{ container_info | json_query(query) }}'
+    cortex_store_gateway_pod_ip: '{{ container_info | json_query(query) }}'
   vars:
     query: 'containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'
