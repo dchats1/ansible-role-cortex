@@ -20,7 +20,7 @@
   loop:
     - cortex-memcached
 
-- name: Get Memecached pod infra container
+- name: Get Memcached pod infra container
   containers.podman.podman_pod_info:
     name:  cortex-memcached-pod
   register: pod_info

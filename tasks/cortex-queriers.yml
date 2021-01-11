@@ -36,7 +36,7 @@
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-querier-{{ item }}.pid'
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
-    command: '-target=querier -querier.frontend-address={{ cortex_query_frontend_ip }}:9095 -config.file=/etc/cortex.yaml'
+    command: '-target=querier -querier.frontend-address={{ cortex_query_frontend_pod_ip }}:9095 -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
