@@ -1,32 +1,31 @@
 ---
-- name: Setup Cortex Store Gateway
+- name: Setup Cortex Query Frontend
   containers.podman.podman_container:
-    name: cortex-store-gateway
+    name: cortex-query-frontend
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
-    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-store-gateway.pid'
     network: '{{ cortex_backend_podman_network }}'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-query-frontend.pid'
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
-    command: '-target=store-gateway -config.file=/etc/cortex.yaml'
+    command: '-target=query-frontend -config.file=/etc/cortex.yaml'
     state: started
 
-- name: Generate systemd files for store gateway
+- name: Generate systemd files for Query Frontend
   include_tasks: systemd.yml
   loop:
-    - cortex-store-gateway
+    - cortex-query-frontend
 
-- name: Restart Service
+- name: Restart Service(s)
   systemd:
-    name: container-cortex-store-gateway.service
+    name: container-cortex-query-frontend.service
     state: restarted
   when: cortex_conf.changed
 
 - name: Get Container info
   containers.podman.podman_container_info:
-    name: cortex-store-gateway
+    name: cortex-query-frontend
   register: container_info
-
 - set_fact:
-    cortex_store_gateway_ip: '{{ container_info | json_query(query) }}'
+    cortex_query_frontend_ip: '{{ container_info | json_query(query) }}'
   vars:
     query: 'containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'

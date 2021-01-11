@@ -1,0 +1,23 @@
+---
+- name: Setup Memcached
+  containers.podman.podman_container:
+    name: cortex-memcached
+    image: memcached
+    network: '{{ cortex_backend_podman_network }}'
+    conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-memcached.pid'
+    command: 'memcached -m 1024 -vv'
+    state: started
+
+- name: Generate systemd files for Memcached
+  include_tasks: systemd.yml
+  loop:
+    - cortex-memcached
+
+- name: Get Container info
+  containers.podman.podman_container_info:
+    name: cortex-memcached
+  register: container_info
+- set_fact:
+    cortex_memcached_ip: '{{ container_info | json_query(query) }}'
+  vars:
+    query: 'containers[0].NetworkSettings.Networks.{{ cortex_backend_podman_network }}.IPAddress'

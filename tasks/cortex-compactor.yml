@@ -15,3 +15,9 @@
   include_tasks: systemd.yml
   loop:
     - cortex-compactor
+
+- name: Restart Service
+  systemd:
+    name: container-cortex-compactor.service
+    state: restarted
+  when: cortex_conf.changed

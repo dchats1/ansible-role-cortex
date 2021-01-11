@@ -14,21 +14,23 @@
   when: cortex_ingesters_with_wal|bool == True
   loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
-- name: Create Ingester TSDB volume
+- name: Create Ingester TSDB volumes
   containers.podman.podman_volume:
     state: present
-    name: 'cortex-ingester-tsdb-volume'
+    name: 'cortex-ingester-tsdb-{{ item }}-volume'
     label:
       app: cortex
   when: cortex_storage_engine == 'blocks'
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
-- name: Create Ingester TSDB Sync volume
+- name: Create Ingester TSDB Sync volumes
   containers.podman.podman_volume:
     state: present
-    name: 'cortex-ingester-tsdb-sync-volume'
+    name: 'cortex-ingester-tsdb-sync-{{ item }}-volume'
     label:
       app: cortex
   when: cortex_storage_engine == 'blocks'
+  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
 
 - name: Create Compactor volume
   containers.podman.podman_volume:
@@ -44,22 +46,3 @@
     dest: '{{ cortex_base_dir }}/cortex-config/cortex.yaml'
     mode: '0644'
   register: cortex_conf
-
-- set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-ingester-" + item|string + ".service" ] }}'
-  loop: '{{ range(0, cortex_ingester_replicas)|list }}'
-  when: cortex_conf.changed
-
-- set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-distributor-" + item|string + ".service" ] }}'
-  loop: '{{ range(0, cortex_distributor_replicas)|list }}'
-  when: cortex_conf.changed
-
-- set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-table-manager.service" ] }}'
-  when: cortex_conf.changed
-
-- set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-querier-" + item|string + ".service" ] }}'
-  loop: '{{ range(0, cortex_querier_replicas)|list }}'
-  when: cortex_conf.changed

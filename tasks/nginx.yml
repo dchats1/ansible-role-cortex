@@ -4,11 +4,7 @@
     src: nginx.conf
     dest: '{{ cortex_base_dir }}/cortex-config/nginx.conf'
     mode: '0644'
-  register: nginx_conf
-
-- set_fact:
-    services_to_restart: '{{ services_to_restart + [ "container-cortex-loadbalancer.service" ] }}'
-  when: nginx_conf.changed
+  notify: Restart Nginx
 
 - name: Create Distributor pods
   containers.podman.podman_pod:

@@ -36,7 +36,7 @@
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-querier-{{ item }}.pid'
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
-    command: '-target=querier -config.file=/etc/cortex.yaml'
+    command: '-target=querier -querier.frontend-address={{ cortex_query_frontend_ip }}:9095 -config.file=/etc/cortex.yaml'
     state: started
   loop: '{{ range(0, cortex_querier_replicas)|list }}'
 
@@ -47,6 +47,13 @@
 - name: Generate systemd files for queriers
   include_tasks: systemd.yml
   loop: '{{ cortex_querier_containers }}'
+
+- name: Restart Service(s)
+  systemd:
+    name: 'container-cortex-querier-{{ item }}.service'
+    state: restarted
+  loop: '{{ range(0, cortex_querier_replicas)|list }}'
+  when: cortex_conf.changed
 
 # Cleanup/scale down
 - name: Get list of all querier pods
