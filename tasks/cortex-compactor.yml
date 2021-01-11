@@ -1,10 +1,17 @@
 ---
+- name: Create Compactor Pod
+  containers.podman.podman_pod:
+    name: cortex-compactor-pod
+    state: started
+    network: '{{ cortex_backend_podman_network }}'
+    hostname: 'cortex-compactor.{{ cortex_domain }}'
+
 - name: Setup Cortex Compactor
   containers.podman.podman_container:
-    name: 'cortex-compactor'
+    name: cortex-compactor
     image: 'quay.io/cortexproject/cortex:{{ cortex_version }}'
     conmon_pidfile: '{{ cortex_base_dir }}/pids/cortex-compactor.pid'
-    network: '{{ cortex_backend_podman_network }}'
+    pod: cortex-compactor-pod
     volume:
       - '{{ cortex_base_dir }}/cortex-config/cortex.yaml:/etc/cortex.yaml:z'
       - cortex-compactor-volume:/compactor
